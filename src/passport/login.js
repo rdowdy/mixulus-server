@@ -1,14 +1,15 @@
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/user');
-var bCrypt = require('bcrypt-nodejs');
+var bCrypt = require('bcrypt');
 
 module.exports = function(passport) {
-
+	console.log("Initializing login strategy...");
 	passport.use('login', new LocalStrategy(
 		{
 			passReqToCallback: true
 		},
 		function(req, email, password, done) {
+			console.log("Doing login");
 			// check to see if the email exists
 			// i'm using their email address as their sign-in
 			User.findOne({'email': email}, function(err, user) {
