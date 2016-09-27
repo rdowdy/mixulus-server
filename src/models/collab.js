@@ -10,7 +10,7 @@ var collabSchema = mongoose.Schema({
 		type: 'string',
 		required: true
 	},
-	completed {
+	completed: {
 		type: 'boolean',
 		required: false
 	},
