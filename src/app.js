@@ -3,7 +3,6 @@
 var clientPath = "/Users/rdowdy/dev/OCA/final_proj/client/app/";
 
 var express = require('express');
-var apiRouter = require('./api');
 var passport = require('passport');
 var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
@@ -36,10 +35,6 @@ initPassport(passport);
 
 var routes = require('./routes/index')(passport, clientPath);
 app.use('/', routes);
-
-
-// set the API router to serve on the /api path
-app.use('/api', apiRouter);
 
 // start up the server
 app.listen(3000, function() {
