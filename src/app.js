@@ -1,9 +1,12 @@
 'use strict';
 
-var clientPath = "/Users/rdowdy/dev/OCA/final_proj/client/app";
+var clientPath = "/Users/rdowdy/dev/OCA/final_proj/client/app/";
 
 var express = require('express');
-var router = require('./api');
+var passport = require('passport');
+var expressSession = require('express-session');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 
 // initialize express
 var app = express();
@@ -12,12 +15,30 @@ var app = express();
 require('./database');
 require('./seed');
 
-// set the root path
-app.use('/', express.static(clientPath));
-// set the api path
-app.use('/api', router);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+//app.use(cookieParser());
+app.use(express.static(clientPath));
+
+// configuring passport
+app.use(expressSession({secret: 'superDuperSecret'}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// flash middleware
+var flash = require('connect-flash');
+app.use(flash());
+
+// Initialize Passport
+var initPassport = require('./passport/init');
+initPassport(passport);
+
+var routes = require('./routes/index')(passport, clientPath);
+app.use('/', routes);
 
 // start up the server
 app.listen(3000, function() {
 	console.log("The server is running on port 3000!");
 })
+
+module.exports = app;
