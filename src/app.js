@@ -3,7 +3,7 @@
 var clientPath = "/Users/rdowdy/dev/OCA/final_proj/client/app";
 
 var express = require('express');
-var router = require('./api');
+var apiRouter = require('./api');
 
 // initialize express
 var app = express();
@@ -12,10 +12,21 @@ var app = express();
 require('./database');
 require('./seed');
 
-// set the root path
+// configuring passport
+var passport = require('passport');
+var expressSession = require('express-session');
+app.use(expressSession({secret: 'superDuperSecret'}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// flash middleware
+var flash = require('connect-flash');
+app.use(flash());
+
+// set where to serve static files from
 app.use('/', express.static(clientPath));
-// set the api path
-app.use('/api', router);
+// set the API router to serve on the /api path
+app.use('/api', apiRouter);
 
 // start up the server
 app.listen(3000, function() {
