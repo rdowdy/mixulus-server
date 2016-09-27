@@ -1,6 +1,6 @@
 'use strict';
 
-var clientPath = "../client";
+var clientPath = "/Users/rdowdy/dev/OCA/final_proj/client/app";
 
 var express = require('express');
 var router = require('./api');
