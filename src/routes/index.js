@@ -44,10 +44,12 @@ module.exports = function(passport, path){
 
 	/* GET Home Page */
 	router.get('/home', isAuthenticated, function(req, res){
-		console.log("home page");
-		console.log(req.session.passport.user);
-		res.send('<h1>home</h1>');
-		//res.render('home', { user: req.user });
+		res.sendFile("features/home/home.html", {root: path});
+	});
+
+	/* GET Workspace Page */
+	router.get('/workspace', isAuthenticated, function(req, res) {
+		res.sendFile("features/workspace/workspace.html", {root: path});
 	});
 
 	/* Handle Logout */

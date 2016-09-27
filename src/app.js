@@ -15,13 +15,20 @@ var app = express();
 require('./database');
 require('./seed');
 
+// use body parser and cookie parser
+// and set the base path to serve static files from
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-//app.use(cookieParser());
+app.use(cookieParser());
 app.use(express.static(clientPath));
 
 // configuring passport
-app.use(expressSession({secret: 'superDuperSecret'}));
+app.use(expressSession(
+	{
+		secret: 'superDuperSecret',
+		maxAge: 3600000
+	}
+));
 app.use(passport.initialize());
 app.use(passport.session());
 
