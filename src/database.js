@@ -2,9 +2,9 @@
 
 var mongoose = require('mongoose');
 
-var app_name = "collabio";
+var db_name = "collabio";
 
-mongoose.connect('mongodb://localhost/' + app_name, function(err) {
+mongoose.connect('mongodb://localhost/' + db_name, function(err) {
 	if(err) {
 		console.log("Theres was an error");
 	} else {
