@@ -15,13 +15,23 @@ var app = express();
 require('./database');
 require('./seed');
 
+// use body parser and cookie parser
+// and set the base path to serve static files from
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-//app.use(cookieParser());
+app.use(cookieParser());
 app.use(express.static(clientPath));
 
+/////////////////////////////
+// Passport
+
 // configuring passport
-app.use(expressSession({secret: 'superDuperSecret'}));
+app.use(expressSession(
+	{
+		secret: 'superDuperSecret',
+		maxAge: 3600000
+	}
+));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -33,8 +43,20 @@ app.use(flash());
 var initPassport = require('./passport/init');
 initPassport(passport);
 
+/////////////////////////////
+
+/////////////////////////////
+// Set up routes
+
 var routes = require('./routes/index')(passport, clientPath);
-app.use('/', routes);
+
+var collabRoute = require("./routes/collab.route.js");
+routes.use("/collabs", collabRoute);
+
+var soundRoute = require("./routes/sound.route.js");
+routes.use("/sounds", soundRoute);
+
+app.use(routes);
 
 // start up the server
 app.listen(3000, function() {

@@ -1,4 +1,6 @@
 var express = require('express');
+var jwt = require('jwt-simple');
+var JwtStrategy = require('passport-jwt').Strategy;
 var router = express.Router();
 
 var isAuthenticated = function (req, res, next) {
@@ -18,16 +20,20 @@ module.exports = function(passport, path){
 	router.get('/', function(req, res) {
     	// Display the Login page with any flash message, if any
 		//res.sendFile("index.html", {root: path});
-		console.log("Serving index.html")
+		console.log("Serving login.html")
 		res.sendFile("login.html", {root: path});
 	});
 
 	/* Handle Login POST */
-	router.post('/login', passport.authenticate('login', {
-		successRedirect: '/home',
-		failureRedirect: '/',
-		failureFlash : true  
-	}));
+	router.post('/login', 
+		passport.authenticate('login', {
+			successRedirect: '/home',
+			failureRedirect: '/'
+		}),
+		function(req, res) {
+			var token = jwt.encode(req.user._id, 'superDuperSecret');
+			res.status(200).json({ state: 'success', token: token, user: req.user.username ? req.user : null})
+		});
 
 	/* GET Registration Page */
 	router.get('/signup', function(req, res){
@@ -44,10 +50,12 @@ module.exports = function(passport, path){
 
 	/* GET Home Page */
 	router.get('/home', isAuthenticated, function(req, res){
-		console.log("home page");
-		console.log(req.session.passport.user);
-		res.send('<h1>home</h1>');
-		//res.render('home', { user: req.user });
+		res.sendFile("features/home/home.html", {root: path});
+	});
+
+	/* GET Workspace Page */
+	router.get('/workspace', isAuthenticated, function(req, res) {
+		res.sendFile("features/workspace/workspace.html", {root: path});
 	});
 
 	/* Handle Logout */
