@@ -22,6 +22,9 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(clientPath));
 
+/////////////////////////////
+// Passport
+
 // configuring passport
 app.use(expressSession(
 	{
@@ -40,8 +43,17 @@ app.use(flash());
 var initPassport = require('./passport/init');
 initPassport(passport);
 
+/////////////////////////////
+
+/////////////////////////////
+// Set up routes
+
 var routes = require('./routes/index')(passport, clientPath);
-app.use('/', routes);
+
+var collabRoute = require("./routes/collab.route.js");
+routes.use("/collabs", collabRoute);
+
+app.use(routes);
 
 // start up the server
 app.listen(3000, function() {

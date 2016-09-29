@@ -7,7 +7,7 @@ var mongoose = require("mongoose");
 
 var collabSchema = mongoose.Schema({
 	startDate: {
-		type: 'string',
+		type: 'date',
 		required: true
 	},
 	completed: {
