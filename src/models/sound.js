@@ -9,10 +9,6 @@ var mongoose = require("mongoose");
 // sound.endMarker
 
 var soundSchema = new mongoose.Schema({
-	path: {
-		type: 'string',
-		required: true
-	},
 	track: {
 		type: 'number',
 		required: true

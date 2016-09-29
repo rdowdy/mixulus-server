@@ -53,6 +53,9 @@ var routes = require('./routes/index')(passport, clientPath);
 var collabRoute = require("./routes/collab.route.js");
 routes.use("/collabs", collabRoute);
 
+var soundRoute = require("./routes/sound.route.js");
+routes.use("/sounds", soundRoute);
+
 app.use(routes);
 
 // start up the server

@@ -61,12 +61,12 @@ router.route("/:id")
 			collab.startDate = req.body.startDate;
 			collab.completed = req.body.completed;
 
-			collab.save(function(err, collab) {
+			collab.save(function(err, savedCollab) {
 				if(err) {
 					return res.send(500, err);
 				}
 
-				res.json(collab);
+				res.json(savedCollab);
 			})
 		});
 	})
