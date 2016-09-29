@@ -99,8 +99,15 @@ router.route("/:collabId/:userId")
 				}
 
 				collab.userIds.push(user._id);
+				user.collabIds.push(collab._id);
 				collab.save(function(err, collab) {
-					res.json(collab);
+					if(err) {
+						return res.send(500, err);
+					}
+
+					user.save(function(err, user) {
+						res.json(collab);
+					})
 				});
 			})
 		})
@@ -129,6 +136,6 @@ router.route("/:collabId/:userId")
 
 router.route("/:collabId/sounds/:soundId")
 	.post(function(req, res) {
-		
+
 	});
 module.exports = router;
