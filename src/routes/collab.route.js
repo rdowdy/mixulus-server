@@ -16,7 +16,7 @@ router.route("/")
 					return res.send(500, err);
 				}
 
-				return res.json(collabs);
+				res.json(collabs);
 			})
 	})
 
@@ -32,7 +32,7 @@ router.route("/")
 				return res.send(500, err);
 			}
 
-			return res.json(collab);
+			res.json(collab);
 		})
 	})
 
@@ -47,7 +47,7 @@ router.route("/:id")
 					return res.send(500, err);
 				}
 
-				return res.json(collab);
+				res.json(collab);
 			});
 	})
 
@@ -66,18 +66,24 @@ router.route("/:id")
 					return res.send(500, err);
 				}
 
-				return res.json(collab);
+				res.json(collab);
 			})
 		});
 	})
 
 	//DELETE: /collabs/:id
 	.delete(function(req, res) {
+		Collab.remove({_id: req.params.id}, function(err, collab) {
+			if(err) {
+				return res.send(500, err);
+			}
 
+			res.json(collab);
+		})
 	});
 
 router.route("/:collabId/:userId")
-	//POST /collabs/:collabId/:userId
+	//POST: /collabs/:collabId/:userId
 	.post(function(req, res) {
 		// TODO: check to make sure that the post request
 		// is coming from a user that's already on the 
@@ -102,11 +108,27 @@ router.route("/:collabId/:userId")
 
 	//DELETE: /collabs/:collabId/:userId
 	.delete(function(req, res) {
+		Collab.findById(req.params.collabId, function(err, collab) {
+			if(err) {
+				return res.send(500, err);
+			}
 
+			User.findById(req.params.userId, function(err, user) {
+				if(err) {
+					return res.send(500, err);
+				}
+
+				var idx = collab.userIds.indexOf(user._id);
+				collab.userIds.splice(idx, 1);
+				collab.save(function(err, collab) {
+					res.json(collab);
+				});
+			})
+		})
 	})
 
 router.route("/:collabId/sounds/:soundId")
 	.post(function(req, res) {
-
+		
 	});
 module.exports = router;
