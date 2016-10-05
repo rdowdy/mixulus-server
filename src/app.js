@@ -13,7 +13,6 @@ var app = express();
 
 // initialize database and seed it
 require('./database');
-require('./seed');
 
 // use body parser and cookie parser
 // and set the base path to serve static files from
