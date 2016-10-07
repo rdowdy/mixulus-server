@@ -19,15 +19,15 @@ var soundSchema = new mongoose.Schema({
 	},
 	startMarker: {
 		type: 'number',
-		required: true
+		required: false
 	},
 	endMarker: {
 		type: 'number',
-		required: true
+		required: false
 	},
-	collabId: {
+	trackId: {
 		type: mongoose.Schema.ObjectId,
-		ref: "Collab"
+		ref: "Track"
 	}
 });
 

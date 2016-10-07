@@ -23,7 +23,7 @@ router.route("/")
 		sound.gridLocation = req.body.gridLocation;
 		sound.startMarker = req.body.startMarker;
 		sound.endMarker = req.body.endMarker;
-		sound.collabId = req.body.collabId;
+		sound.trackId = req.body.trackId;
 
 		sound.save(function(err, sound) {
 			if(err) {
@@ -58,7 +58,7 @@ router.route("/:id")
 			sound.gridLocation = req.body.gridLocation;
 			sound.startMarker = req.body.startMarker;
 			sound.endMarker = req.body.endMarker;
-			sound.collabId = req.body.collabId;
+			sound.trackId = req.body.trackId;
 
 			sound.save(function(err, savedSound) {
 				if(err) {

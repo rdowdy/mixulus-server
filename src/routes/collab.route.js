@@ -3,7 +3,7 @@ var router = express.Router();
 var passport = require('passport');
 var Collab = require("../models/collab");
 var User = require("../models/user");
-var Sound = require("../models/sound");
+var Track = require("../models/track");
 
 router.route("/")
 
@@ -43,7 +43,7 @@ router.route("/:id")
 		Collab
 			.findById(req.params.id)
 			.populate('userIds', '_id username')
-			.populate('soundIds')
+			.populate('trackIds')
 			.exec(function(err, collab) {
 				if(err) {
 					return res.send(500, err);
@@ -136,21 +136,21 @@ router.route("/:collabId/:userId")
 		})
 	})
 
-router.route("/:collabId/sounds/:soundId")
+router.route("/:collabId/tracks/:trackId")
 	.post(function(req, res) {
 		Collab.findById(req.params.collabId, function(err, collab) {
 			if(err) {
 				return res.send(500, err);
 			}
 
-			Sound.findById(req.params.soundId, function(err, sound) {
+			Track.findById(req.params.trackId, function(err, track) {
 				if(err) {
 					return res.send(500, err);
 				}
 
-				collab.soundIds.push(sound._id);
-				sound.collabId = collab._id;
-				sound.save(function(err, sound) {
+				collab.trackIds.push(track._id);
+				track.collabId = collab._id;
+				track.save(function(err, track) {
 					if(err) {
 						return res.send(500, err);
 					}

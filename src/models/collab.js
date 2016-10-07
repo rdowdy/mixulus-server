@@ -6,6 +6,10 @@ var mongoose = require("mongoose");
 // collab.completed
 
 var collabSchema = mongoose.Schema({
+	name: {
+		type: 'string',
+		required: true
+	},
 	startDate: {
 		type: 'date',
 		required: true
@@ -20,10 +24,10 @@ var collabSchema = mongoose.Schema({
 			ref: "User"
 		}
 	],
-	soundIds: [
+	trackIds: [
 		{
 			type: mongoose.Schema.ObjectId,
-			ref: "Sound"
+			ref: "Track"
 		}
 	]
 
