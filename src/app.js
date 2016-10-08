@@ -105,10 +105,10 @@ io.on('connection', function(socket) {
     	// now we need to turn the writeBuffer into
     	// an actual buffer
     	// 8 bytes per float
-    	var actualBuffer = new Buffer(writeBuffer.length * 8);
+    	var actualBuffer = new Buffer(writeBuffer.length * 16);
     	for(var i = 0; i < writeBuffer.length; i++){
         	//write the float in Little-Endian and move the offset
-        	actualBuffer.writeFloatLE(writeBuffer[i], i*8);
+        	actualBuffer.writeFloatBE(writeBuffer[i], i*16);
     	}
     	wstream.write(actualBuffer);
         // write to stream

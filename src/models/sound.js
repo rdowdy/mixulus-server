@@ -13,7 +13,19 @@ var soundSchema = new mongoose.Schema({
 		type: 'number',
 		required: true
 	},
+	filePath: {
+		type: 'string',
+		required: false
+	},
 	gridLocation: {
+		type: 'number',
+		required: true
+	},
+	frameLength: {
+		type: 'number',
+		required: false
+	},
+	fps: {
 		type: 'number',
 		required: true
 	},
