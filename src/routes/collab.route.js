@@ -9,9 +9,11 @@ router.route("/")
 
 	//GET: /collabs
 	.get(function(req, res) {
+			var userId = req.decoded._doc._id;
 			Collab
 				.find()
 				.populate('userIds', '_id username')
+				.find({userIds: userId})
 				.exec(function(err, collabs) {
 					if(err) {
 						return res.send(500, err);
@@ -24,16 +26,31 @@ router.route("/")
 	//POST: /collabs
 	.post(function(req, res) {
 		var collab = new Collab();
+		var userId = req.decoded._doc._id;
 
 		collab.startDate = req.body.startDate;
 		collab.completed = req.body.completed;
+		collab.userIds = [];
+		collab.userIds.push(userId);
 
 		collab.save(function(err, collab) {
 			if(err) {
 				return res.send(500, err);
 			}
 
-			res.json(collab);
+			User.findById(userId, function(err, user) {
+				if(err) {
+					return res.send(500, err);
+				}
+
+				user.save(function(err, user) {
+					if(err) {
+						return res.send(500, err);
+					}
+
+					res.json(collab);
+				})
+			})
 		})
 	})
 
