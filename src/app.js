@@ -34,8 +34,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // flash middleware
-var flash = require('connect-flash');
-app.use(flash());
+// var flash = require('connect-flash');
+// app.use(flash());
 
 // Initialize Passport
 var initPassport = require('./passport/init');
