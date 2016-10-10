@@ -2,7 +2,6 @@ var authRoute = require('../passport/authenticate');
 var express = require('express');
 var JwtStrategy = require('passport-jwt').Strategy;
 var router = express.Router();
-var jwtVerifier = require('../passport/verify');
 
 var isAuthenticated = function(req, res, next) {
     // if user is authenticated in the session, call the next() to call the next request handler 
@@ -22,12 +21,12 @@ module.exports = function(passport, path) {
     });
 
     // /* Handle Login POST */
-    // router.post('/login',
-    // 	passport.authenticate('login', { session: false }),
-    // 	function(req, res) {
-    //            var token = jwt.encode(req.user._id, 'superDuperSecret');
-    //            res.status(200).json({ state: 'success', token: token, user: req.user.username ? req.user : null });
-    //        });
+    router.post('/login',
+    	passport.authenticate('login'),
+        function(req, res) {
+            req.user.password = null;
+            res.send(200, {success: true, user: req.user});
+        });
 
     /* Handle Registration POST */
     router.post('/signup', passport.authenticate('signup', {
@@ -38,16 +37,14 @@ module.exports = function(passport, path) {
     /* Sign a user in and send JWT */
     router.post('/authenticate', authRoute);
 
-    /* Use JWT verify middlware to authenticate home, workspace, and signout routes */
-    router.use(jwtVerifier);
-
     /* GET Home Page */
-    router.get('/home', function(req, res) {
+    router.get('/home', isAuthenticated, function(req, res) {
+        console.log("HOME");
         res.sendFile("features/home/home.html", { root: path });
     });
 
     /* GET Workspace Page */
-    router.get('/workspace', function(req, res) {
+    router.get('/workspace', isAuthenticated, function(req, res) {
         res.sendFile("features/workspace/workspace.html", { root: path });
     });
 
