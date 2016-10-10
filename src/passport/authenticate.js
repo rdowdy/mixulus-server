@@ -22,6 +22,8 @@ module.exports = function(req, res) {
 
                 // if user is found and password is right
                 // create a token
+              	// but first remove password from user object
+              	user.password = null;
                 var token = jwt.sign(user, 'superDuperSecret', {
                     expiresIn: 60*60*24// expires in 24 hours
                 });
