@@ -64,16 +64,6 @@ router.route("/:id")
 			}
 
 			// // attach PCM data to sound object
-			// var pcm = fs.readFileSync(soundFilePath + sound.filePath);
-			// var floatBuf = new Float32Array(pcm.length);
-
-			// console.log(pcm);
-			// for(var i = 0; i < pcm.length; i++) {
-			// 	floatBuf[i] = pcm[i];
-			// }
-			// sound.buffer = floatBuf;
-			// //console.log(floatBuf);
-
 			fs.open(soundFilePath + sound.filePath, 'r', function(err, fd) {
 				if(err) {
 					res.json(500, err);
