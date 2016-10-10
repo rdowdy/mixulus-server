@@ -9,17 +9,17 @@ router.route("/")
 
 	//GET: /collabs
 	.get(function(req, res) {
-		Collab
-			.find()
-			.populate('userIds', '_id username')
-			.exec(function(err, collabs) {
-				if(err) {
-					return res.send(500, err);
-				}
+			Collab
+				.find()
+				.populate('userIds', '_id username')
+				.exec(function(err, collabs) {
+					if(err) {
+						return res.send(500, err);
+					}
 
-				res.json(collabs);
-			})
-	})
+					res.json(collabs);
+				});
+		})
 
 	//POST: /collabs
 	.post(function(req, res) {
