@@ -6,7 +6,7 @@ module.exports = function(req, res) {
 
     // find the user
     User.findOne({
-        email: req.body.email
+        email: req.body.username
     }, function(err, user) {
 
         if (err) throw err;
@@ -19,7 +19,7 @@ module.exports = function(req, res) {
             if (!isValidPassword(user, req.body.password)) {
                 res.json({ success: false, message: 'Authentication failed. Wrong password.' });
             } else {
-
+                console.log("JWT authentication success");
                 // if user is found and password is right
                 // create a token
               	// but first remove password from user object
