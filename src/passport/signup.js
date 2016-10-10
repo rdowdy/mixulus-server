@@ -46,6 +46,8 @@ module.exports = function(passport) {
 		}
 	));
 
+	
+
 	function createHash(password) {
 			return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
 	}

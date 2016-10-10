@@ -9,31 +9,48 @@ router.route("/")
 
 	//GET: /collabs
 	.get(function(req, res) {
-		Collab
-			.find()
-			.populate('userIds', '_id username')
-			.exec(function(err, collabs) {
-				if(err) {
-					return res.send(500, err);
-				}
+			var userId = req.decoded._doc._id;
+			Collab
+				.find()
+				.populate('userIds', '_id username')
+				.find({userIds: userId})
+				.exec(function(err, collabs) {
+					if(err) {
+						return res.send(500, err);
+					}
 
-				res.json(collabs);
-			})
-	})
+					res.json(collabs);
+				});
+		})
 
 	//POST: /collabs
 	.post(function(req, res) {
 		var collab = new Collab();
+		var userId = req.decoded._doc._id;
 
 		collab.startDate = req.body.startDate;
 		collab.completed = req.body.completed;
+		collab.userIds = [];
+		collab.userIds.push(userId);
 
 		collab.save(function(err, collab) {
 			if(err) {
 				return res.send(500, err);
 			}
 
-			res.json(collab);
+			User.findById(userId, function(err, user) {
+				if(err) {
+					return res.send(500, err);
+				}
+
+				user.save(function(err, user) {
+					if(err) {
+						return res.send(500, err);
+					}
+
+					res.json(collab);
+				})
+			})
 		})
 	})
 
@@ -49,7 +66,13 @@ router.route("/:id")
 					return res.send(500, err);
 				}
 
-				res.json(collab);
+				// check to make sure the user is part of the collab
+				if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+					res.json(collab);
+				} else {
+					console.log("GET /collabs/:id forbidden request")
+					return res.send(403);
+				}
 			});
 	})
 
@@ -60,16 +83,22 @@ router.route("/:id")
 				return res.send(500, err);
 			}
 
-			collab.startDate = req.body.startDate;
-			collab.completed = req.body.completed;
+			// check to make sure the user is part of the collab
+			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+				collab.startDate = req.body.startDate;
+				collab.completed = req.body.completed;
 
-			collab.save(function(err, savedCollab) {
-				if(err) {
-					return res.send(500, err);
-				}
+				collab.save(function(err, savedCollab) {
+					if(err) {
+						return res.send(500, err);
+					}
 
-				res.json(savedCollab);
-			})
+					res.json(savedCollab);
+				})
+			} else {
+				return res.send(403);
+			}
+
 		});
 	})
 
@@ -80,38 +109,45 @@ router.route("/:id")
 				return res.send(500, err);
 			}
 
-			res.json(collab);
+			// check to make sure the user is part of the collab
+			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+				res.json(collab);
+			} else {
+				return res.send(403);
+			}
 		})
 	});
 
 router.route("/:collabId/:userId")
 	//POST: /collabs/:collabId/:userId
 	.post(function(req, res) {
-		// TODO: check to make sure that the post request
-		// is coming from a user that's already on the 
-		// collab
 		Collab.findById(req.params.collabId, function(err, collab) {
 			if(err) {
 				return res.send(500, err);
 			}
 
-			User.findById(req.params.userId, function(err, user) {
-				if(err) {
-					return res.send(500, err);
-				}
-
-				collab.userIds.push(user._id);
-				user.collabIds.push(collab._id);
-				collab.save(function(err, collab) {
+			// check to make sure the user is part of the collab
+			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+				User.findById(req.params.userId, function(err, user) {
 					if(err) {
 						return res.send(500, err);
 					}
 
-					user.save(function(err, user) {
-						res.json(collab);
-					})
-				});
-			})
+					collab.userIds.push(user._id);
+					user.collabIds.push(collab._id);
+					collab.save(function(err, collab) {
+						if(err) {
+							return res.send(500, err);
+						}
+
+						user.save(function(err, user) {
+							res.json(collab);
+						})
+					});
+				})
+			} else {
+				return res.send(403);
+			}
 		})
 	})
 
@@ -122,17 +158,22 @@ router.route("/:collabId/:userId")
 				return res.send(500, err);
 			}
 
-			User.findById(req.params.userId, function(err, user) {
-				if(err) {
-					return res.send(500, err);
-				}
+			// check to make sure the caller of this API endpoint is part of the collab
+			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+				User.findById(req.params.userId, function(err, user) {
+					if(err) {
+						return res.send(500, err);
+					}
 
-				var idx = collab.userIds.indexOf(user._id);
-				collab.userIds.splice(idx, 1);
-				collab.save(function(err, collab) {
-					res.json(collab);
-				});
-			})
+					var idx = collab.userIds.indexOf(user._id);
+					collab.userIds.splice(idx, 1);
+					collab.save(function(err, collab) {
+						res.json(collab);
+					});
+				})
+			} else {
+				return res.send(403);
+			}
 		})
 	})
 
@@ -143,23 +184,39 @@ router.route("/:collabId/tracks/:trackId")
 				return res.send(500, err);
 			}
 
-			Track.findById(req.params.trackId, function(err, track) {
-				if(err) {
-					return res.send(500, err);
-				}
-
-				collab.trackIds.push(track._id);
-				track.collabId = collab._id;
-				track.save(function(err, track) {
+			// check to make sure the user is part of the collab
+			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+				Track.findById(req.params.trackId, function(err, track) {
 					if(err) {
 						return res.send(500, err);
 					}
 
-					collab.save(function(err, collab) {
-						res.json(collab);
+					collab.trackIds.push(track._id);
+					track.collabId = collab._id;
+					track.save(function(err, track) {
+						if(err) {
+							return res.send(500, err);
+						}
+
+						collab.save(function(err, collab) {
+							res.json(collab);
+						})
 					})
 				})
-			})
+			} else {
+				return res.send(403);
+			}
+
 		})
 	});
+
+function checkUserIdsForId(userIds, id) {
+	for(var i = 0; i < userIds.length; i++) {
+		if(userIds[i]._id == id) {
+			return true;
+		}
+	}
+
+	return false;
+}
 module.exports = router;

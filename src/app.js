@@ -8,6 +8,7 @@ var passport = require('passport');
 var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var jwtVerifier = require('./passport/verify');
 
 // initialize express
 var app = express();
@@ -34,8 +35,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // flash middleware
-var flash = require('connect-flash');
-app.use(flash());
+// var flash = require('connect-flash');
+// app.use(flash());
 
 // Initialize Passport
 var initPassport = require('./passport/init');
@@ -47,6 +48,9 @@ initPassport(passport);
 // Set up routes
 
 var routes = require('./routes/index')(passport, clientPath);
+
+/* Use JWT verify middlware to authenticate API endpoint routes */
+routes.use(jwtVerifier);
 
 var collabRoute = require("./routes/collab.route.js");
 routes.use("/collabs", collabRoute);
