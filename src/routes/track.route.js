@@ -19,4 +19,26 @@ router.route("/")
 		})
 	});
 
+router.route("/:trackId")
+	// PUT: /tracks/:trackId
+	.put(function(req, res) {
+		Track.findById(req.params.trackId, function(err, track) {
+			if(err) {
+				return res.send(500, err);
+			}
+
+			track.gain = req.body.gain;
+			track.name = req.body.name;
+
+			track.save(function(err, track) {
+				if(err) {
+					return res.send(500, err);
+				}
+
+				res.json(track);
+			})
+
+		})
+	})
+
 module.exports = router;
