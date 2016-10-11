@@ -1,6 +1,7 @@
 'use strict';
 
 var mongoose = require("mongoose");
+var Track = require('./track');
 
 // sound.path
 // sound.track

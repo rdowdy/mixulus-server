@@ -119,12 +119,29 @@ router.route("/:id")
 
 	//DELETE: /sounds/:id
 	.delete(function(req, res) {
-		Sound.remove({_id: req.params.id}, function(err, sound) {
+		Sound.findOneAndRemove({_id: req.params.id}, function(err, sound) {
 			if(err) {
 				return res.send(500, err);
 			}
 
-			res.json(sound);
+			// remove the track->sound relationship
+			Track.findById(sound.trackId, function(err, track) {
+				if(err) {
+					return res.send(500, err);
+				}
+
+				var idx = track.soundIds.indexOf(sound.trackId);
+				track.soundIds.splice(idx, 1);
+				track.save(function(err, track) {
+					if(err) {
+						return res.send(500, err);
+					}
+
+					res.json(sound);
+				})
+
+			})
+
 		})
 	})
 
