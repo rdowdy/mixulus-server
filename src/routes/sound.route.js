@@ -119,10 +119,18 @@ router.route("/:id")
 
 	//DELETE: /sounds/:id
 	.delete(function(req, res) {
+		// find and remove the sound document from DB
 		Sound.findOneAndRemove({_id: req.params.id}, function(err, sound) {
 			if(err) {
 				return res.send(500, err);
 			}
+
+			// delete the PCM file
+			fs.unlink("server/sounds/" + sound.filePath, function(err) {
+				if(err) {
+					console.log(err);
+				}
+			})
 
 			// remove the track->sound relationship
 			Track.findById(sound.trackId, function(err, track) {
