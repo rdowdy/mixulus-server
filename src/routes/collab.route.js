@@ -28,6 +28,7 @@ router.route("/")
 		var collab = new Collab();
 		var userId = req.decoded._doc._id;
 
+		collab.name = req.body.name;
 		collab.startDate = req.body.startDate;
 		collab.completed = req.body.completed;
 		collab.userIds = [];
@@ -87,6 +88,7 @@ router.route("/:id")
 			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
 				collab.startDate = req.body.startDate;
 				collab.completed = req.body.completed;
+				collab.name = req.body.name;
 
 				collab.save(function(err, savedCollab) {
 					if(err) {
@@ -212,7 +214,8 @@ router.route("/:collabId/tracks/:trackId")
 
 function checkUserIdsForId(userIds, id) {
 	for(var i = 0; i < userIds.length; i++) {
-		if(userIds[i]._id == id) {
+		var idToCheck = userIds[i]._id || userIds[i];
+		if(idToCheck == id) {
 			return true;
 		}
 	}
