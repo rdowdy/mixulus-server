@@ -120,7 +120,7 @@ router.route("/:id")
 		})
 	});
 
-router.route("/:collabId/:userId")
+router.route("/[0-9A-Fa-f]{24}/:userId")
 	//POST: /collabs/:collabId/:userId
 	.post(function(req, res) {
 		Collab.findById(req.params.collabId, function(err, collab) {
@@ -177,7 +177,7 @@ router.route("/:collabId/:userId")
 				return res.send(403);
 			}
 		})
-	})
+	});
 
 router.route("/:collabId/tracks/:trackId")
 	.post(function(req, res) {
@@ -210,6 +210,36 @@ router.route("/:collabId/tracks/:trackId")
 			}
 
 		})
+	});
+
+	router.route("/commit/:collabId")
+		.post(function(req, res) {
+			Collab.findById(req.params.collabId, function(err, collab) {
+				if(err) {
+					console.log(err);
+					return res.send(500, err);
+				}
+
+				if(checkUserIdsForId(collab.userIds, req.decoded._doc._id) &&
+					collab.userIds[collab.currentUserIndex] == req.decoded._doc._id) {
+
+					collab.currentUserIndex++;
+
+					if(collab.currentUserIndex == collab.userIds.length) {
+						collab.currentUserIndex = 0;
+					}
+
+					collab.save(function(err, collab) {
+						if(err) {
+							return res.send(500, err);
+						}
+
+						res.json(200, {currentUserIndex: collab.currentUserIndex});
+					})
+				} else {
+					return res.send(403);
+				}
+			})
 	});
 
 function checkUserIdsForId(userIds, id) {

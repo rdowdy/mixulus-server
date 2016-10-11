@@ -18,6 +18,10 @@ var collabSchema = mongoose.Schema({
 		type: 'boolean',
 		required: false
 	},
+	currentUserIndex: {
+		type: 'number',
+		required: true
+	},
 	userIds: [
 		{
 			type: mongoose.Schema.ObjectId,
