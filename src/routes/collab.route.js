@@ -29,8 +29,9 @@ router.route("/")
 		var userId = req.decoded._doc._id;
 
 		collab.name = req.body.name;
-		collab.startDate = req.body.startDate;
+		collab.startDate = new Date().getTime();
 		collab.completed = req.body.completed;
+		collab.currentUserIndex = req.body.currentUserIndex;
 		collab.userIds = [];
 		collab.userIds.push(userId);
 

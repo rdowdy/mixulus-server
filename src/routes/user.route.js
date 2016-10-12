@@ -37,4 +37,22 @@ router.route("/:id")
 
 	// })
 
+router.route("/search/:username")
+	//GET: /users/search/:username
+	.get(function(req, res) {
+		var username = req.params.username;
+
+		User.findOne({username: username}, function(err, user) {
+			if(err) {
+				return res.send(500, err);
+			}
+
+			if(user == null) {
+				res.send(200, {_id: null})
+			} else {
+				res.send(200, {_id: user._id});
+			}
+		})
+	})
+
 module.exports = router;

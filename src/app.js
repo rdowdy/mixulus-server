@@ -61,6 +61,9 @@ routes.use("/tracks", trackRoute);
 var soundRoute = require("./routes/sound.route.js");
 routes.use("/sounds", soundRoute);
 
+var userRoute = require("./routes/user.route.js");
+routes.use("/users", userRoute);
+
 app.use(routes);
 
 // start up the server
