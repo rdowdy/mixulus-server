@@ -121,9 +121,10 @@ router.route("/:id")
 		})
 	});
 
-router.route("/[0-9A-Fa-f]{24}/:userId")
+router.route("/:collabId([0-9A-Fa-f]{24})/:userId")
 	//POST: /collabs/:collabId/:userId
 	.post(function(req, res) {
+		console.log(req.params);
 		Collab.findById(req.params.collabId, function(err, collab) {
 			if(err) {
 				return res.send(500, err);
