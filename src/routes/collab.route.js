@@ -68,7 +68,7 @@ router.route("/:id")
 				}
 
 				// check to make sure the user is part of the collab
-				if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+				if(checkUserIsAllowed(collab.userIds, req.decoded._doc._id, collab.currentUserIndex)) {
 					res.json(collab);
 				} else {
 					console.log("GET /collabs/:id forbidden request")
@@ -85,7 +85,7 @@ router.route("/:id")
 			}
 
 			// check to make sure the user is part of the collab
-			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+			if(checkUserIsAllowed(collab.userIds, req.decoded._doc._id, collab.currentUserIndex)) {
 				collab.startDate = req.body.startDate;
 				collab.completed = req.body.completed;
 				collab.name = req.body.name;
@@ -112,7 +112,7 @@ router.route("/:id")
 			}
 
 			// check to make sure the user is part of the collab
-			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+			if(checkUserIsAllowed(collab.userIds, req.decoded._doc._id, collab.currentUserIndex)) {
 				res.json(collab);
 			} else {
 				return res.send(403);
@@ -129,7 +129,7 @@ router.route("/[0-9A-Fa-f]{24}/:userId")
 			}
 
 			// check to make sure the user is part of the collab
-			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+			if(checkUserIsAllowed(collab.userIds, req.decoded._doc._id, collab.currentUserIndex)) {
 				User.findById(req.params.userId, function(err, user) {
 					if(err) {
 						return res.send(500, err);
@@ -161,7 +161,7 @@ router.route("/[0-9A-Fa-f]{24}/:userId")
 			}
 
 			// check to make sure the caller of this API endpoint is part of the collab
-			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+			if(checkUserIsAllowed(collab.userIds, req.decoded._doc._id, collab.currentUserIndex)) {
 				User.findById(req.params.userId, function(err, user) {
 					if(err) {
 						return res.send(500, err);
@@ -187,7 +187,7 @@ router.route("/:collabId/tracks/:trackId")
 			}
 
 			// check to make sure the user is part of the collab
-			if(checkUserIdsForId(collab.userIds, req.decoded._doc._id)) {
+			if(checkUserIsAllowed(collab.userIds, req.decoded._doc._id, collab.currentUserIndex)) {
 				Track.findById(req.params.trackId, function(err, track) {
 					if(err) {
 						return res.send(500, err);
@@ -220,8 +220,7 @@ router.route("/:collabId/tracks/:trackId")
 					return res.send(500, err);
 				}
 
-				if(checkUserIdsForId(collab.userIds, req.decoded._doc._id) &&
-					collab.userIds[collab.currentUserIndex] == req.decoded._doc._id) {
+				if(checkUserIsAllowed(collab.userIds, req.decoded._doc._id, collab.currentUserIndex)) {
 
 					collab.currentUserIndex++;
 
@@ -242,7 +241,12 @@ router.route("/:collabId/tracks/:trackId")
 			})
 	});
 
-function checkUserIdsForId(userIds, id) {
+function checkUserIsAllowed(userIds, id, currentUserIndex) {
+	var currentUserId = userIds[currentUserIndex]._id || userIds[currentUserIndex];
+	if(currentUserId != id) {
+		return false;
+	}
+
 	for(var i = 0; i < userIds.length; i++) {
 		var idToCheck = userIds[i]._id || userIds[i];
 		if(idToCheck == id) {
