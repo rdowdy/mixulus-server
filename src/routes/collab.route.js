@@ -72,7 +72,7 @@ router.route("/:id")
 					res.json(collab);
 				} else {
 					console.log("GET /collabs/:id forbidden request")
-					return res.send(403);
+					return res.send(403, "Unauthorized");
 				}
 			});
 	})
