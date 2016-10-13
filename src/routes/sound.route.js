@@ -63,6 +63,10 @@ router.route("/:id")
 				return res.send(500, err);
 			}
 
+			if(sound == null) {
+				return res.json(400, req.params.id);
+			}
+
 			// // attach PCM data to sound object
 			fs.open(soundFilePath + sound.filePath, 'r', function(err, fd) {
 				if(err) {
@@ -138,7 +142,7 @@ router.route("/:id")
 					return res.send(500, err);
 				}
 
-				var idx = track.soundIds.indexOf(sound.trackId);
+				var idx = track.soundIds.indexOf(sound._id);
 				track.soundIds.splice(idx, 1);
 				track.save(function(err, track) {
 					if(err) {
