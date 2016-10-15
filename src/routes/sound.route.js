@@ -70,7 +70,7 @@ router.route("/:id")
 			// // attach PCM data to sound object
 			fs.open(soundFilePath + sound.filePath, 'r', function(err, fd) {
 				if(err) {
-					res.json(500, err);
+					return res.json(500, err);
 				}
 
 				var buffer = [];

@@ -17,12 +17,12 @@ module.exports = function(passport) {
     				return done(err);
     			} else if(!user) {
     				console.log("User not found with email: " + email);
-    				return done(null, false, req.flash("message", "Couldn't find user"))
+    				return done(null, false)
     			}
 
     			if(!isValidPassword(user, password)) {
     				console.log('Invalid Password');
-    				return done(null, false, req.flash('message', 'Invalid Password'));
+    				return done(null, false);
     			}
 
     			// user and password both match, return

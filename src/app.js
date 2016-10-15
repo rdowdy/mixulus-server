@@ -99,7 +99,6 @@ io.on('connection', function(socket) {
     });
 
     socket.on('audio buffer', function(data) {
-        //console.log(data.buffer);
         data.buffer.len = data.bufferLen;
         recBuffers[data.bufferNum] = data.buffer;
         recLen += data.bufferLen;
