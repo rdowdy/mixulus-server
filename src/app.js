@@ -10,6 +10,7 @@ var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var jwtVerifier = require('./passport/verify');
+var https = require('https');
 
 // initialize express
 var app = express();
@@ -67,10 +68,21 @@ routes.use("/users", userRoute);
 
 app.use(routes);
 
+/////////////////////////////
 // start up the server
-app.listen(3000, function() {
-    console.log("The server is running on port 3000!");
-})
+var privateKey = fs.readFileSync('/home/bitnami/stack/apache2/conf/privkey.pem');
+var servercert = fs.readFileSync('/home/bitnami/stack/apache2/conf/server.crt');
+
+https.createServer({
+    key: privateKey,
+    cert: servercert
+}, app).listen(3000, function() {
+    console.log("The HTTPS server is running on port 3000!");
+});
+
+// app.listen(3000, function() {
+//     console.log("The server is running on port 3000!");
+// })
 
 /////////////////////////////
 // Socket.IO Stuff
