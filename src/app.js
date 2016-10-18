@@ -1,6 +1,7 @@
 'use strict';
 
 var clientPath = "/Users/rdowdy/dev/OCA/final_proj/client/app/";
+var awsPath = "/home/bitnami/apps/public/app/";
 
 var fs = require('fs');
 var express = require('express');
@@ -21,7 +22,7 @@ require('./database');
 app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({ limit: '100mb' }));
 app.use(cookieParser());
-app.use(express.static(clientPath));
+app.use(express.static(awsPath));
 
 /////////////////////////////
 // Passport
@@ -47,7 +48,7 @@ initPassport(passport);
 /////////////////////////////
 // Set up routes
 
-var routes = require('./routes/index')(passport, clientPath);
+var routes = require('./routes/index')(passport, awsPath);
 
 /* Use JWT verify middlware to authenticate API endpoint routes */
 routes.use(jwtVerifier);
