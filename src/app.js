@@ -75,7 +75,8 @@ var servercert = fs.readFileSync('/home/bitnami/stack/apache2/conf/server.crt');
 
 https.createServer({
     key: privateKey,
-    cert: servercert
+    cert: servercert,
+    passphrase: '0Hpi6s9fOamR'
 }, app).listen(3000, function() {
     console.log("The HTTPS server is running on port 3000!");
 });
