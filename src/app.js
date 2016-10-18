@@ -68,7 +68,7 @@ routes.use("/users", userRoute);
 app.use(routes);
 
 // start up the server
-app.listen(3000, function() {
+app.listen(80, function() {
     console.log("The server is running on port 3000!");
 })
 
