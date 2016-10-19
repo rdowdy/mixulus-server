@@ -68,7 +68,7 @@ routes.use("/users", userRoute);
 app.use(routes);
 
 // start up the server
-app.listen(process.env.PORT || 80, function() {
+app.listen(process.env.PORT || 80, "127.0.0.1", function() {
     console.log("The server is running on port 3000!");
 })
 
@@ -76,7 +76,7 @@ app.listen(process.env.PORT || 80, function() {
 // Socket.IO Stuff
 
 var socket_app = express();
-var socket_server = socket_app.listen(9999, function() {
+var socket_server = socket_app.listen(9999, "127.0.0.1", function() {
     console.log("socket_app is running on port 9999");
 });
 
