@@ -76,7 +76,7 @@ app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
 // Socket.IO Stuff
 
 var socket_app = express();
-var socket_server = socket_app.listen(9999, "127.0.0.1", function() {
+var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
     console.log("socket_app is running on port 9999");
 });
 
