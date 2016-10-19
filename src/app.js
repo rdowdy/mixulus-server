@@ -21,7 +21,7 @@ require('./database');
 app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({ limit: '100mb' }));
 app.use(cookieParser());
-app.use(express.static(awsPath));
+app.use(express.static(publicPath));
 
 /////////////////////////////
 // Passport
@@ -47,7 +47,7 @@ initPassport(passport);
 /////////////////////////////
 // Set up routes
 
-var routes = require('./routes/index')(passport, awsPath);
+var routes = require('./routes/index')(passport, publicPath);
 
 /* Use JWT verify middlware to authenticate API endpoint routes */
 routes.use(jwtVerifier);
