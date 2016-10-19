@@ -1,7 +1,7 @@
 'use strict';
 
-var clientPath = "/Users/rdowdy/dev/OCA/final_proj/client/app/";
-var awsPath = "/home/bitnami/apps/public/app/";
+var publicPath = process.env.PUBLIC_PATH;
+console.log("Root path is: " + publicPath);
 
 var fs = require('fs');
 var express = require('express');
@@ -22,7 +22,7 @@ require('./database');
 app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({ limit: '100mb' }));
 app.use(cookieParser());
-app.use(express.static(awsPath));
+app.use(express.static(publicPath));
 
 /////////////////////////////
 // Passport
@@ -48,7 +48,7 @@ initPassport(passport);
 /////////////////////////////
 // Set up routes
 
-var routes = require('./routes/index')(passport, awsPath);
+var routes = require('./routes/index')(passport, publicPath);
 
 /* Use JWT verify middlware to authenticate API endpoint routes */
 routes.use(jwtVerifier);
@@ -68,7 +68,7 @@ routes.use("/users", userRoute);
 app.use(routes);
 
 // start up the server
-app.listen(3000, function() {
+app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
     console.log("The server is running on port 3000!");
 })
 
@@ -76,7 +76,7 @@ app.listen(3000, function() {
 // Socket.IO Stuff
 
 var socket_app = express();
-var socket_server = socket_app.listen(9999, function() {
+var socket_server = socket_app.listen(9999, "127.0.0.1", function() {
     console.log("socket_app is running on port 9999");
 });
 
