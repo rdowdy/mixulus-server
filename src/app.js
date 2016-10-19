@@ -14,7 +14,7 @@ var cors = require('cors');
 
 // initialize express
 var app = express();
-
+var socket_app = express();
 
 var corsOptions = {
     origin: "https://mixulus.com",
@@ -22,6 +22,11 @@ var corsOptions = {
 };
 
 app.use(cors(corsOptions));
+socket_app.use(cors(corsOptions));
+
+var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
+    console.log("socket_app is running on port 9999");
+});
 
 // initialize database and seed it
 require('./database');
@@ -83,13 +88,6 @@ app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
 
 /////////////////////////////
 // Socket.IO Stuff
-
-var socket_app = express();
-socket_app.use(cors(corsOptions));
-
-var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
-    console.log("socket_app is running on port 9999");
-});
 
 var io = require('socket.io')(socket_server);
 
