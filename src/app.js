@@ -1,6 +1,7 @@
 'use strict';
 
 var publicPath = process.env.PUBLIC_PATH;
+console.log("Root path is: " + publicPath);
 
 var fs = require('fs');
 var express = require('express');
