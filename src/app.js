@@ -21,8 +21,6 @@ var corsOptions = {
     credentials: true
 };
 
-app.use();
-
 // initialize database and seed it
 require('./database');
 
