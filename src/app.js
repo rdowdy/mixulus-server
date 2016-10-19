@@ -10,9 +10,12 @@ var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var jwtVerifier = require('./passport/verify');
+var cors = require('cors');
 
 // initialize express
 var app = express();
+
+app.use(cors());
 
 // initialize database and seed it
 require('./database');
@@ -76,6 +79,8 @@ app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
 // Socket.IO Stuff
 
 var socket_app = express();
+socket_app.use(cors());
+
 var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
     console.log("socket_app is running on port 9999");
 });
