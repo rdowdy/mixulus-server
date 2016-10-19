@@ -1,7 +1,6 @@
 'use strict';
 
-var clientPath = "/Users/rdowdy/dev/OCA/final_proj/client/app/";
-var awsPath = "/home/bitnami/apps/public/app/";
+var publicPath = process.env.PUBLIC_PATH;
 
 var fs = require('fs');
 var express = require('express');
@@ -68,7 +67,7 @@ routes.use("/users", userRoute);
 app.use(routes);
 
 // start up the server
-app.listen(3000, function() {
+app.listen(process.env.PORT || 80, function() {
     console.log("The server is running on port 3000!");
 })
 

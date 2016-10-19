@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose');
 
-var db_url = "mongodb://app:imGoingBack2505@52.70.144.221:27017/collabio";
+var db_url = process.env.MONGO_DB_URL;
 
 mongoose.connect(db_url, function(err) {
 	if(err) {
