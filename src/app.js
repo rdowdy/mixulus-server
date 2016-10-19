@@ -17,7 +17,8 @@ var app = express();
 
 
 var corsOptions = {
-    origin: "https://mixulus.com"
+    origin: "https://mixulus.com",
+    credentials: true
 };
 
 app.use(cors(corsOptions));
