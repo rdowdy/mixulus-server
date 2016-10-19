@@ -23,58 +23,6 @@ var corsOptions = {
 
 app.use(cors(corsOptions));
 
-/////////////////////////////
-// Socket.IO Stuff
-
-socket_app.use(cors(corsOptions));
-
-var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
-    console.log("socket_app is running on port 9999");
-});
-
-var io = require('socket.io')(socket_server);
-
-socket_app.use(bodyParser.urlencoded({ extended: false }));
-socket_app.use(express.static('static'));
-
-var wstream;
-var recBuffers;
-var recLen;
-var soundWritePath = "server/sounds/"
-
-io.on('connection', function(socket) {
-    console.log("A user connected");
-    socket.on('start record', function(data) {
-        console.log("starting a recording session for " + data.id);
-        wstream = fs.createWriteStream(soundWritePath + data.id + '.pcm');
-        recBuffers = [];
-        recLen = 0;
-    });
-
-    socket.on('audio buffer', function(data) {
-        data.buffer.len = data.bufferLen;
-        recBuffers[data.bufferNum] = data.buffer;
-        recLen += data.bufferLen;
-    });
-
-    socket.on('done record', function(data) {
-        console.log("ending recording session for " + data.id);
-        // merge buffers 
-        var writeBuffer = mergeBuffers(recBuffers, recLen);
-        // now we need to turn the writeBuffer into
-        // an actual buffer
-        // 8 bytes per float
-        var actualBuffer = new Buffer(writeBuffer.length * 16);
-        for(var i = 0; i < writeBuffer.length; i++){
-            //write the float in Little-Endian and move the offset
-            actualBuffer.writeFloatBE(writeBuffer[i], i*16);
-        }
-        wstream.write(actualBuffer);
-        // write to stream
-        wstream.end();
-    });
-});
-
 // initialize database and seed it
 require('./database');
 
@@ -132,6 +80,58 @@ app.use(routes);
 app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
     console.log("The server is running on port 3000!");
 })
+
+/////////////////////////////
+// Socket.IO Stuff
+
+socket_app.use(cors(corsOptions));
+
+var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
+    console.log("socket_app is running on port 9999");
+});
+
+var io = require('socket.io')(socket_server);
+
+socket_app.use(bodyParser.urlencoded({ extended: false }));
+socket_app.use(express.static('static'));
+
+var wstream;
+var recBuffers;
+var recLen;
+var soundWritePath = "server/sounds/"
+
+io.on('connection', function(socket) {
+    console.log("A user connected");
+    socket.on('start record', function(data) {
+        console.log("starting a recording session for " + data.id);
+        wstream = fs.createWriteStream(soundWritePath + data.id + '.pcm');
+        recBuffers = [];
+        recLen = 0;
+    });
+
+    socket.on('audio buffer', function(data) {
+        data.buffer.len = data.bufferLen;
+        recBuffers[data.bufferNum] = data.buffer;
+        recLen += data.bufferLen;
+    });
+
+    socket.on('done record', function(data) {
+        console.log("ending recording session for " + data.id);
+        // merge buffers 
+        var writeBuffer = mergeBuffers(recBuffers, recLen);
+        // now we need to turn the writeBuffer into
+        // an actual buffer
+        // 8 bytes per float
+        var actualBuffer = new Buffer(writeBuffer.length * 16);
+        for(var i = 0; i < writeBuffer.length; i++){
+            //write the float in Little-Endian and move the offset
+            actualBuffer.writeFloatBE(writeBuffer[i], i*16);
+        }
+        wstream.write(actualBuffer);
+        // write to stream
+        wstream.end();
+    });
+});
 
 function mergeBuffers(buf, length) {
     var result = new Float32Array(length);
