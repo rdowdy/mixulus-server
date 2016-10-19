@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose');
 
-var db_url = process.env.MONGO_DB_URL;
+var db_url = process.env.MONGO_DB_URL + "/mixulus";
 
 mongoose.connect(db_url, function(err) {
 	if(err) {
