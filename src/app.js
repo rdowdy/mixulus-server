@@ -14,7 +14,6 @@ var cors = require('cors');
 
 // initialize express
 var app = express();
-var socket_app = express();
 
 var corsOptions = {
     origin: "https://mixulus.com",
@@ -81,22 +80,21 @@ app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
 
 /////////////////////////////
 // Socket.IO Stuff
-
+var socket_app = express();
 socket_app.use(cors(corsOptions));
-
-var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
-    console.log("socket_app is running on port 9999");
-});
-
-var io = require('socket.io')(socket_server);
-
 socket_app.use(bodyParser.urlencoded({ extended: false }));
 socket_app.use(express.static('static'));
+
+var socket_server = socket_app.listen(9998, "127.0.0.1/record", function() {
+    console.log("socket_app is running on port 9999");
+});
 
 var wstream;
 var recBuffers;
 var recLen;
 var soundWritePath = "server/sounds/"
+
+var io = require('socket.io')(socket_server);
 
 io.on('connection', function(socket) {
     console.log("A user connected");
