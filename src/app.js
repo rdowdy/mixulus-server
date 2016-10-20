@@ -85,7 +85,7 @@ socket_app.use(cors(corsOptions));
 socket_app.use(bodyParser.urlencoded({ extended: false }));
 socket_app.use(express.static('static'));
 
-var socket_server = socket_app.listen(9998, "127.0.0.1/record", function() {
+var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
     console.log("socket_app is running on port 9999");
 });
 
@@ -94,7 +94,7 @@ var recBuffers;
 var recLen;
 var soundWritePath = "server/sounds/"
 
-var io = require('socket.io')(socket_server);
+var io = require('socket.io')(socket_server, { path: "/record" });
 
 io.on('connection', function(socket) {
     console.log("A user connected");
