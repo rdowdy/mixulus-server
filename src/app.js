@@ -97,6 +97,20 @@ var soundWritePath = "server/sounds/"
 var io = require('socket.io')(socket_server, { path: "/record" });
 
 io.on('connection', function(socket) {
+
+    var onevent = socket.onevent;
+    socket.onevent = function (packet) {
+        var args = packet.data || [];
+        onevent.call (this, packet);    // original call
+        packet.data = ["*"].concat(args);
+        onevent.call(this, packet);      // additional call to catch-all
+    };
+
+    socket.on("*", function(event, data) {
+        console.log(event);
+        console.log(data);
+    });
+
     console.log("A user connected");
     socket.on('start record', function(data) {
         console.log("starting a recording session for " + data.id);
