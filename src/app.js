@@ -99,7 +99,7 @@ var soundWritePath = "server/sounds/"
 
 var io = require('socket.io')(socket_server, { path: "/record" });
 
-io.on('connection', function(socket) {
+io.of('/record').on('connection', function(socket) {
 
     console.log("A user connected");
     socket.on('start record', function(data) {
@@ -127,9 +127,9 @@ io.on('connection', function(socket) {
             //write the float in Little-Endian and move the offset
             actualBuffer.writeFloatBE(writeBuffer[i], i*16);
         }
-        wstream.write(actualBuffer);
+        wstream.write(actualBuffer, function(err) { wstream.end(); });
         // write to stream
-        wstream.end();
+        //wstream.end();
     });
 });
 
