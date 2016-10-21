@@ -15,7 +15,7 @@ var cors = require('cors');
 // initialize express
 var app = express();
 
-app.use(require('morgan')('dev'));
+//app.use(require('morgan')('dev'));
 
 var corsOptions = {
     origin: "https://mixulus.com",
