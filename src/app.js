@@ -15,6 +15,8 @@ var cors = require('cors');
 // initialize express
 var app = express();
 
+app.use(require('morgan')('dev'));
+
 var corsOptions = {
     origin: "https://mixulus.com",
     credentials: true
@@ -81,6 +83,7 @@ app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
 /////////////////////////////
 // Socket.IO Stuff
 var socket_app = express();
+socket_app.use(require('morgan')('dev'));
 socket_app.use(cors(corsOptions));
 socket_app.use(bodyParser.urlencoded({ extended: false }));
 socket_app.use(express.static('static'));
@@ -97,19 +100,6 @@ var soundWritePath = "server/sounds/"
 var io = require('socket.io')(socket_server, { path: "/record" });
 
 io.on('connection', function(socket) {
-
-    var onevent = socket.onevent;
-    socket.onevent = function (packet) {
-        var args = packet.data || [];
-        onevent.call (this, packet);    // original call
-        packet.data = ["*"].concat(args);
-        onevent.call(this, packet);      // additional call to catch-all
-    };
-
-    socket.on("*", function(event, data) {
-        console.log(event);
-        console.log(data);
-    });
 
     console.log("A user connected");
     socket.on('start record', function(data) {
