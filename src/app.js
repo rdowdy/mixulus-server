@@ -99,7 +99,7 @@ var soundWritePath = "server/sounds/"
 
 var io = require('socket.io')(socket_server, { path: "/record" });
 
-io.of('/record').on('connection', function(socket) {
+io.on('connection', function(socket) {
 
     console.log("A user connected");
     socket.on('start record', function(data) {
