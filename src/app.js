@@ -97,12 +97,12 @@ var recBuffers;
 var recLen;
 var soundWritePath = "server/sounds/"
 
-var io = require('socket.io')(socket_server);
+var io = require('socket.io')(socket_server, { path: "/record" });
 
 io.on('connection', function(socket) {
 
     console.log("A user connected");
-    socket.on('start record', function(data) {
+    socket.of('/record').on('start record', function(data) {
         console.log("starting a recording session for " + data.id);
         wstream = fs.createWriteStream(soundWritePath + data.id + '.pcm');
         recBuffers = [];
