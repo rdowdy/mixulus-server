@@ -111,7 +111,14 @@ io.on('connection', function(socket) {
 
     socket.on('audio buffer', function(data) {
         data.buffer.len = data.bufferLen;
-        recBuffers[data.bufferNum] = data.buffer;
+
+        if(recBuffers) {
+            recBuffers[data.bufferNum] = data.buffer;
+        } else {
+            tempBuffer = [];
+            tempBuffer[data.bufferNum] = data.buffer;
+        }
+        
         recLen += data.bufferLen;
     });
 
