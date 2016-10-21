@@ -30,10 +30,12 @@ module.exports = function(passport, path) {
         });
 
     /* Handle Registration POST */
-    router.post('/signup', passport.authenticate('signup', {
-        successRedirect: '/home',
-        failureRedirect: '/'
-    }));
+    router.post('/signup', 
+        passport.authenticate('signup'),
+        function(req, res) {
+            req.user.password = null;
+            res.send(200, {success: true, user: req.user});
+        });
 
     /* Sign a user in and send JWT */
     router.post('/authenticate', authRoute);

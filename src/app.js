@@ -10,9 +10,17 @@ var expressSession = require('express-session');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var jwtVerifier = require('./passport/verify');
+var cors = require('cors');
 
 // initialize express
 var app = express();
+
+//app.use(require('morgan')('dev'));
+
+var corsOptions = {
+    origin: "https://mixulus.com",
+    credentials: true
+};
 
 // initialize database and seed it
 require('./database');
@@ -74,29 +82,35 @@ app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
 
 /////////////////////////////
 // Socket.IO Stuff
-
 var socket_app = express();
-var socket_server = socket_app.listen(9999, "127.0.0.1", function() {
-    console.log("socket_app is running on port 9999");
-});
-
-var io = require('socket.io')(socket_server);
-
+socket_app.use(require('morgan')('dev'));
+socket_app.use(cors(corsOptions));
 socket_app.use(bodyParser.urlencoded({ extended: false }));
 socket_app.use(express.static('static'));
 
+var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
+    console.log("socket_app is running on port 9999");
+});
+
 var wstream;
 var recBuffers;
+var tempBuffer;
 var recLen;
 var soundWritePath = "server/sounds/"
 
-io.on('connection', function(socket) {
+var io = require('socket.io')(socket_server, { path: "/record" });
+
+io.of('/record').on('connection', function(socket) {
+
     console.log("A user connected");
     socket.on('start record', function(data) {
         console.log("starting a recording session for " + data.id);
         wstream = fs.createWriteStream(soundWritePath + data.id + '.pcm');
+
         recBuffers = [];
         recLen = 0;
+
+        socket.emit("ready", {path: "/record"});
     });
 
     socket.on('audio buffer', function(data) {
@@ -109,17 +123,17 @@ io.on('connection', function(socket) {
         console.log("ending recording session for " + data.id);
         // merge buffers 
         var writeBuffer = mergeBuffers(recBuffers, recLen);
-    	// now we need to turn the writeBuffer into
-    	// an actual buffer
-    	// 8 bytes per float
-    	var actualBuffer = new Buffer(writeBuffer.length * 16);
-    	for(var i = 0; i < writeBuffer.length; i++){
-        	//write the float in Little-Endian and move the offset
-        	actualBuffer.writeFloatBE(writeBuffer[i], i*16);
-    	}
-    	wstream.write(actualBuffer);
+        // now we need to turn the writeBuffer into
+        // an actual buffer
+        // 8 bytes per float
+        var actualBuffer = new Buffer(writeBuffer.length * 16);
+        for(var i = 0; i < writeBuffer.length; i++){
+            //write the float in Little-Endian and move the offset
+            actualBuffer.writeFloatBE(writeBuffer[i], i*16);
+        }
+        wstream.write(actualBuffer, function(err) { wstream.end(); });
         // write to stream
-        wstream.end();
+        //wstream.end();
     });
 });
 
