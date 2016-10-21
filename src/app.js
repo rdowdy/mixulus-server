@@ -97,7 +97,7 @@ var recBuffers;
 var recLen;
 var soundWritePath = "server/sounds/"
 
-var io = require('socket.io')(socket_server, { path: "/record" });
+var io = require('socket.io')(socket_server);
 
 io.on('connection', function(socket) {
 
