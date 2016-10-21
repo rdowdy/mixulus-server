@@ -94,6 +94,7 @@ var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
 
 var wstream;
 var recBuffers;
+var tempBuffer;
 var recLen;
 var soundWritePath = "server/sounds/"
 
@@ -105,20 +106,16 @@ io.of('/record').on('connection', function(socket) {
     socket.on('start record', function(data) {
         console.log("starting a recording session for " + data.id);
         wstream = fs.createWriteStream(soundWritePath + data.id + '.pcm');
+
         recBuffers = [];
         recLen = 0;
+
+        socket.emit("ready", {path: "/record"});
     });
 
     socket.on('audio buffer', function(data) {
         data.buffer.len = data.bufferLen;
-
-        if(recBuffers) {
-            recBuffers[data.bufferNum] = data.buffer;
-        } else {
-            tempBuffer = [];
-            tempBuffer[data.bufferNum] = data.buffer;
-        }
-        
+        recBuffers[data.bufferNum] = data.buffer;
         recLen += data.bufferLen;
     });
 
