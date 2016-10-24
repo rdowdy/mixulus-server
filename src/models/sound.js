@@ -20,7 +20,7 @@ var soundSchema = new mongoose.Schema({
 	},
 	gridLocation: {
 		type: 'number',
-		required: true
+		required: false
 	},
 	frameLength: {
 		type: 'number',
