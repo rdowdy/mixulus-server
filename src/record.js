@@ -110,6 +110,7 @@ nsp.on('connection', function(socket) {
         // write to the PCM file
         var wstream = fs.createWriteStream(pcmFilesPath + data.id + '.pcm');
         wstream.write(actualBuffer, function(err) {
+            console.log(err);
             // close it on err
             wstream.end();
         });
