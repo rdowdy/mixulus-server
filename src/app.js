@@ -74,6 +74,7 @@ app.listen(port, "127.0.0.1", function() {
     console.log("The server is running on port " + port);
 })
 
+// the socket server takes care of a user's recording session
 var socketServer = require("./record.js");
 
 module.exports = app;

@@ -7,8 +7,9 @@ var bodyParser = require('body-parser');
 var jwtVerifier = require('./passport/verify');
 var cors = require('cors');
 
-/////
-// environment configuration
+/////////////////////////////
+// Environment Configuration
+/////////////////////////////
 var production = process.env.PRODUCTION == 'true';
 var port = 9998;
 var ip = "127.0.0.1";
@@ -19,7 +20,7 @@ var corsOptions = {
 
 if(production) {
     corsOptions.origin = "https://mixulus.com";
-} else {
+} else { // dev mode
     corsOptions.origin = "https://localhost:8080";
 }
 
@@ -48,7 +49,7 @@ var io = require('socket.io')(socket_server, cfg);
 var nsp;
 if(production) {
     nsp = io.of('/record');
-} else {
+} else { // dev mode
     nsp = io;
 }
 
@@ -56,15 +57,31 @@ if(production) {
 // Set up the recording events
 /////////////////////////////
 var recSessions = {};
+var bitDepth = 16;
+var pcmFilesPath = "server/sounds/"
 
 nsp.on('connection', function(socket) {
     // this event marks the beginning of a recording session
     socket.on('start', function(data) {
+        recSessions[data.id] = {};
+        recSessions[data.id].recLen = 0; // total number of samples recorded
+        recSessions[data.id].queue = []; // queue of audio buffers
 
+        socket.emit("ready", cfg);
     });
 
     // push an audio buffer to a user's recording queue
     socket.on('queue', function(data) {
+        recSessions[data.id].recLen += data.bufferLen;
+        
+        var buffer = {
+            buffer: data.buffer,
+            bufferNum: data.bufferNum
+        }
+        // include the array length so objToArray can convert
+        buffer.buffer.len = data.bufferLen;
+
+        recSessions[data.id].queue.push(buffer);
 
     });
 
@@ -72,64 +89,50 @@ nsp.on('connection', function(socket) {
     //   - check for missing buffers
     //   - merge and write the audio buffers
     socket.on('stop', function(data) {
+        // check to make sure we have the right amount of buffers
+        if(data.numBuffers != recSessions[data.id].queue.length) {
+            console.log("HEY WE GOT A PROBLEM");
+        }
 
+        ////////////////
+        // merge the buffers
+        var mergedBuffers = mergeBufferPackets(recSessions[data.id].queue, recSessions[data.id].recLen);
+        
+        // now we need to turn the mergedBuffers into
+        // an actual buffer
+        var actualBuffer = new Buffer(mergedBuffers.length * bitDepth);
+        for(var i = 0; i < mergedBuffers.length; i++){
+            //write the float in Big-Endian and move the offset
+            actualBuffer.writeFloatBE(mergedBuffers[i], i * bitDepth);
+        }
+
+        ////////////////
+        // write to the PCM file
+        var wstream = fs.createWriteStream(pcmFilesPath + data.id + '.pcm');
+        wstream.write(actualBuffer, function(err) {
+            // close it on err
+            wstream.end();
+        });
+
+        wstream.end();
     });
 });
-
-// var wstream;
-// var recBuffers;
-// var tempBuffer;
-// var recLen;
-// var soundWritePath = "server/sounds/"
-
-// var io = require('socket.io')(socket_server/*, { path: "/record" }*/);
-
-// io/*.of('/record')*/.on('connection', function(socket) {
-
-//     console.log("A user connected");
-//     socket.on('start record', function(data) {
-//         console.log("starting a recording session for " + data.id);
-//         wstream = fs.createWriteStream(soundWritePath + data.id + '.pcm');
-
-//         recBuffers = [];
-//         recLen = 0;
-
-//         socket.emit("ready", {path: "/record"});
-//     });
-
-//     socket.on('audio buffer', function(data) {
-//         data.buffer.len = data.bufferLen;
-//         recBuffers[data.bufferNum] = data.buffer;
-//         recLen += data.bufferLen;
-//     });
-
-//     socket.on('done record', function(data) {
-//         console.log("ending recording session for " + data.id);
-//         // merge buffers 
-//         var writeBuffer = mergeBuffers(recBuffers, recLen);
-//         // now we need to turn the writeBuffer into
-//         // an actual buffer
-//         // 8 bytes per float
-//         var actualBuffer = new Buffer(writeBuffer.length * 16);
-//         for(var i = 0; i < writeBuffer.length; i++){
-//             //write the float in Little-Endian and move the offset
-//             actualBuffer.writeFloatBE(writeBuffer[i], i*16);
-//         }
-//         wstream.write(actualBuffer, function(err) { wstream.end(); });
-//         // write to stream
-//         //wstream.end();
-//     });
-// });
 
 /////////////////////////////
 // Helper Functions
 /////////////////////////////
+function mergeBufferPackets(bufferPackets, length) { 
+    // merge the packet objects into an array of arrays
+    var buffers = [];
+    for(var i = 0; i < bufferPackets.length; i++) {
+        buffers[bufferPackets[i].bufferNum] = bufferPackets[i].buffer;
+    }
 
-function mergeBuffers(buf, length) {
+    // merge the 2-d array into a 1-d array
     var result = new Float32Array(length);
     var offset = 0;
-    for (var i = 0; i < buf.length; i++) {
-    	var arr = objToArray(buf[i]);
+    for (var i = 0; i < buffers.length; i++) {
+    	var arr = objToArray(buffers[i]);
         // put recBuffer[i] values into result
         // at position {offset}
         result.set(arr, offset);
