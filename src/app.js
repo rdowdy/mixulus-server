@@ -1,8 +1,4 @@
 'use strict';
-
-var publicPath = process.env.PUBLIC_PATH;
-console.log("Root path is: " + publicPath);
-
 var fs = require('fs');
 var express = require('express');
 var passport = require('passport');
@@ -12,153 +8,76 @@ var bodyParser = require('body-parser');
 var jwtVerifier = require('./passport/verify');
 var cors = require('cors');
 
+////////////////////////
+// Environment Configuration
+////////////////////////
+var publicPath = process.env.PUBLIC_PATH;
+console.log("Root path is: " + publicPath);
+
 // initialize express
 var app = express();
 
-//app.use(require('morgan')('dev'));
-
-var corsOptions = {
-    origin: "https://mixulus.com",
-    credentials: true
-};
-
-// initialize database and seed it
+// connect to database
 require('./database');
 
-// use body parser and cookie parser
-// and set the base path to serve static files from
+////////////////////////
+// Middleware
+////////////////////////
 app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({ limit: '100mb' }));
 app.use(cookieParser());
 app.use(express.static(publicPath));
 
-/////////////////////////////
+////////////////////////
 // Passport
+////////////////////////
 
-// configuring passport
+// Configure 
 app.use(expressSession({
     secret: 'superDuperSecret',
     maxAge: 3600000
 }));
+
+// Initialize 
 app.use(passport.initialize());
 app.use(passport.session());
+require('./passport/init')(passport);
 
-// flash middleware
-// var flash = require('connect-flash');
-// app.use(flash());
-
-// Initialize Passport
-var initPassport = require('./passport/init');
-initPassport(passport);
-
-/////////////////////////////
-
-/////////////////////////////
-// Set up routes
+////////////////////////
+// API Routes
+////////////////////////
 
 var routes = require('./routes/index')(passport, publicPath);
 
-/* Use JWT verify middlware to authenticate API endpoint routes */
+// Use JWT verification to check API routes authorization
 routes.use(jwtVerifier);
 
+// Require the routing code
 var collabRoute = require("./routes/collab.route.js");
-routes.use("/collabs", collabRoute);
-
 var trackRoute = require("./routes/track.route.js");
-routes.use("/tracks", trackRoute);
-
 var soundRoute = require("./routes/sound.route.js");
-routes.use("/sounds", soundRoute);
-
 var userRoute = require("./routes/user.route.js");
+
+// Use the routing code on these routes
+routes.use("/collabs", collabRoute);
+routes.use("/tracks", trackRoute);
+routes.use("/sounds", soundRoute);
 routes.use("/users", userRoute);
 
+// Use API routes on app server
 app.use(routes);
 
-// start up the server
-app.listen(process.env.PORT || 8080, "127.0.0.1", function() {
-    console.log("The server is running on port 3000!");
+////////////////////////
+// Start the App Server
+////////////////////////
+var port = process.env.PORT || 8080;
+app.listen(port, "127.0.0.1", function() {
+    console.log("The server is running on port " + port);
 })
 
-/////////////////////////////
-// Socket.IO Stuff
-var socket_app = express();
-socket_app.use(require('morgan')('dev'));
-socket_app.use(cors(corsOptions));
-socket_app.use(bodyParser.urlencoded({ extended: false }));
-socket_app.use(express.static('static'));
-
-var socket_server = socket_app.listen(9998, "127.0.0.1", function() {
-    console.log("socket_app is running on port 9999");
-});
-
-var wstream;
-var recBuffers;
-var tempBuffer;
-var recLen;
-var soundWritePath = "server/sounds/"
-
-var io = require('socket.io')(socket_server, { path: "/record" });
-
-io.of('/record').on('connection', function(socket) {
-
-    console.log("A user connected");
-    socket.on('start record', function(data) {
-        console.log("starting a recording session for " + data.id);
-        wstream = fs.createWriteStream(soundWritePath + data.id + '.pcm');
-
-        recBuffers = [];
-        recLen = 0;
-
-        socket.emit("ready", {path: "/record"});
-    });
-
-    socket.on('audio buffer', function(data) {
-        data.buffer.len = data.bufferLen;
-        recBuffers[data.bufferNum] = data.buffer;
-        recLen += data.bufferLen;
-    });
-
-    socket.on('done record', function(data) {
-        console.log("ending recording session for " + data.id);
-        // merge buffers 
-        var writeBuffer = mergeBuffers(recBuffers, recLen);
-        // now we need to turn the writeBuffer into
-        // an actual buffer
-        // 8 bytes per float
-        var actualBuffer = new Buffer(writeBuffer.length * 16);
-        for(var i = 0; i < writeBuffer.length; i++){
-            //write the float in Little-Endian and move the offset
-            actualBuffer.writeFloatBE(writeBuffer[i], i*16);
-        }
-        wstream.write(actualBuffer, function(err) { wstream.end(); });
-        // write to stream
-        //wstream.end();
-    });
-});
-
-function mergeBuffers(buf, length) {
-    var result = new Float32Array(length);
-    var offset = 0;
-    for (var i = 0; i < buf.length; i++) {
-    	var arr = objToArray(buf[i]);
-        // put recBuffer[i] values into result
-        // at position {offset}
-        result.set(arr, offset);
-        offset += arr.length;
-    }
-
-    return result;
-}
-
-function objToArray(bufObj) {
-	var len = bufObj.len;
-	var out = new Float32Array(len);
-	for(var i = 0; i < len; i++) {
-		out[i] = bufObj[i];
-	}
-
-	return out;
-}
+////////////////////////
+// Socket server used for recording
+////////////////////////
+require("./record.js");
 
 module.exports = app;

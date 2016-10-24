@@ -10,26 +10,39 @@ var isAuthenticated = function(req, res, next) {
     // request and response objects
     if (req.isAuthenticated())
         return next();
-    // if the user is not authenticated then redirect him to the login page
+    // if the user is not authenticated then redirect them to the login page
     res.redirect('/');
 }
 
 module.exports = function(passport, path) {
-    /* GET login page. */
+    ////////////////////////
+    // Main App Routes
+    ////////////////////////
+
+    // GET /login
     router.get('/', function(req, res) {
-        // Display the Login page with any flash message, if any
+        // Display the Login page
         res.sendFile("login.html", { root: path });
     });
 
-    // /* Handle Login POST */
-    router.post('/login',
-    	passport.authenticate('login'),
-        function(req, res) {
-            req.user.password = null;
-            res.send(200, {success: true, user: req.user});
-        });
+    // GET /home
+    router.get('/home', isAuthenticated, function(req, res) {
+        // Send the user's home page (add collab, list existing collabs)
+        res.sendFile("features/home/home.html", { root: path });
+    });
 
-    /* Handle Registration POST */
+    // GET /workspace
+    router.get('/workspace', isAuthenticated, function(req, res) {
+        // Music production workspace
+        res.sendFile("features/workspace/workspace.html", { root: path });
+    });
+    
+    ////////////////////////
+    // Authentication & Authorization
+    ////////////////////////    
+
+    // POST /signup
+    // : this also starts a session with the user
     router.post('/signup', 
         passport.authenticate('signup'),
         function(req, res) {
@@ -37,21 +50,20 @@ module.exports = function(passport, path) {
             res.send(200, {success: true, user: req.user});
         });
 
-    /* Sign a user in and send JWT */
+    // POST /login
+    // : this starts a session with the user
+    router.post('/login',
+    	passport.authenticate('login'),
+        function(req, res) {
+            req.user.password = null;
+            res.send(200, {success: true, user: req.user});
+        });
+
+    // POST /authenticate
+    // : this generates a JWT for the user
     router.post('/authenticate', authRoute);
 
-    /* GET Home Page */
-    router.get('/home', isAuthenticated, function(req, res) {
-        console.log("HOME");
-        res.sendFile("features/home/home.html", { root: path });
-    });
-
-    /* GET Workspace Page */
-    router.get('/workspace', isAuthenticated, function(req, res) {
-        res.sendFile("features/workspace/workspace.html", { root: path });
-    });
-
-    /* Handle Logout */
+    // GET /signout
     router.get('/signout', function(req, res) {
         req.logout();
         res.redirect('/');
